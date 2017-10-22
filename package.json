@@ -2,25 +2,27 @@
   "name": "electron-vue-spring",
   "version": "1.0.0",
   "description": "A minimal starter project for using Electron, Vue and Spring.",
+  "author": "Wu, Ruoyun",
   "main": "electron/index.js",
   "scripts": {
     "start": "electron ./electron",
     "build-vue": "cd vue && npm run build && copyfiles -u 1 dist/*.* ../spring/src/main/resources/public && cd ..",
     "clean-vue": "cd vue && npm run clean && rimraf ../spring/src/main/resources/public && cd ..",
-    "build-spring": "cd spring && mvnw package && cd ..",
-    "clean-spring": "cd spring && mvnw clean && cd ..",
+    "build-spring": "cd spring && ./mvnw package && cd ..",
+    "clean-spring": "rimraf spring/target",
     "pack": "npm run build-vue && npm run build-spring && build --dir",
     "build": "npm run build-vue && npm run build-spring && build",
-    "clean": "rimraf dist && clean-vue && clean-spring"
+    "clean": "rimraf dist && npm-run-all clean-vue clean-spring"
   },
-  "author": "",
   "license": "MIT",
   "build": {
     "appId": "electron-vue-spring",
     "extraFiles": [
       {
-        "from": "spring/target/bundles/spring",
-        "to": "server"
+        "from": "spring/target",
+        "filter": [
+          "*.jar"
+        ]
       }
     ]
   },
@@ -28,9 +30,13 @@
     "copyfiles": "^1.2.0",
     "electron": "^1.7.9",
     "electron-builder": "^19.37.2",
+    "npm-run-all": "^4.1.1",
     "rimraf": "^2.6.2"
   },
   "dependencies": {
-    "axios": "^0.16.2"
+    "axios": "^0.16.2",
+    "electron-is-dev": "^0.3.0",
+    "electron-log": "^2.2.9",
+    "tree-kill": "^1.2.0"
   }
 }

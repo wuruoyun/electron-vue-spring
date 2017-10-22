@@ -49,42 +49,6 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
-
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>package-bundle</id>
-						<phase>package</phase>
-						<goals>
-							<goal>exec</goal>
-						</goals>
-						<configuration>
-							<executable>
-								${env.JAVA_HOME}/bin/javapackager
-							</executable>
-
-							<arguments>
-								<argument>-deploy</argument>
-								<argument>-native</argument>
-								<argument>image</argument>
-								<argument>-srcfiles</argument>
-								<argument>${build.directory}/${build.finalName}.jar</argument>
-								<argument>-outdir</argument>
-								<argument>${build.directory}</argument>
-								<argument>-outfile</argument>
-								<argument>${artifactId}-app</argument>
-								<argument>-appclass</argument>
-								<argument>org.springframework.boot.loader.JarLauncher</argument>
-								<argument>-name</argument>
-								<argument>${name}</argument>
-								<argument>-v</argument>
-							</arguments>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 

@@ -1,13 +1,14 @@
 const electron = require('electron')
+const path = require('path')
+const url = require('url')
+const logger = require('electron-log');
+
 // Module to control application life.
 const app = electron.app
 // Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow
 
-const path = require('path')
-const url = require('url')
-
-const isProd = process.execPath.search('electron-prebuilt') === -1;
+const isDev = require('electron-is-dev');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -16,28 +17,30 @@ let mainWindow;
 let serverProcess;
 
 function launchServer(port) {
-  console.log(`Launching server at port ${port}...`);
   const platform = process.platform;
 
-  if (platform === 'win32') {
-    const launcher = isProd ? 
-      'server/spring.exe' : 'spring/target/bundles/spring/spring.exe';
-    serverProcess = require('child_process')
-      .spawn(launcher);
-  } else if (platform === 'darwin') {
-    serverProcess = require('child_process')
-      .spawn(app.getAppPath() + '/TODO');
-  }
-
-  if (serverProcess) {
-    serverProcess.stdout.on('data', data => {
-      console.log('SERVER: ' + data);
-    });
-    serverProcess.stderr.on('data', data => {
-      console.log('SERVER: ' + data);
-    });
+  logger.info(`Process exe directory: ${app.getPath('exe')}`);
   
-    console.log("Server PID: " + serverProcess.pid);
+  const jar = 'spring-1.0.0.jar';
+  const server = isDev ? `spring/target/${jar}` 
+    : `${path.join(app.getAppPath(), '..', '..', jar)}`;
+  logger.info(`Launching server with jar ${server} at port ${port}...`);
+
+  serverProcess = require('child_process')
+    .spawn('java', [ '-jar', server]);
+
+  serverProcess.stdout.on('data', data => {
+    logger.info('SERVER: ' + data);
+  });
+
+  serverProcess.stderr.on('data', data => {
+    logger.error('SERVER: ' + data);
+  });
+
+  if (serverProcess.pid) {
+    logger.info("Server PID: " + serverProcess.pid);
+  } else {
+    logger.error("Failed to launch server process.")
   }
 }
 
@@ -104,7 +107,12 @@ app.on('activate', function () {
 
 app.on('will-quit', () => {
   if (serverProcess) {
-    serverProcess.kill();
+    logger.info(`Killing server process ${serverProcess.pid}`);
+    const kill = require('tree-kill');
+    kill(serverProcess.pid, 'SIGTERM', function (err) {
+      logger.info('Server process killed');
+        serverProcess = null;
+    });
   }
 });
 // In this file you can include the rest of your app's specific main process
