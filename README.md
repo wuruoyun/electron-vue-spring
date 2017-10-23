@@ -9,11 +9,13 @@ This project has two sub projects. Although they are just folders in this projec
 1. `vue`: a Vue.js application as the front-end, based on Vue's [webpack-simple template](https://github.com/vuejs-templates/webpack-simple).
 2. `spring`: a Spring Boot application as the backend, based on a Maven project created by [Spring Initializer](https://start.spring.io/) with Web dependency.
 
+Both Windows and Mac OS are supported.
+
 > NOTE: This project uses your system Java to run the spring web app. If you prefer to bundle JRE into the app, configure the `extraFiles` of Electron Builder to copy it when making the installer.
 
 ## Build Setup
 
-Build the final installer, which can be found in folder `dist`.
+Build the final installer, which can be found in folder `dist`. It is an `exe` file for Windows and `dmg` file for Mac.
 
 ``` bash
 # install dependencies
@@ -55,7 +57,7 @@ However, both `vue` sub project and `spring` sub project are free of Electron an
 
 When launching the Electron app:
 
-1. Electron app spawns the backend launcher with Node `child_process`.
+1. Electron app detects an available port and starts the backend server with Node `child_process` at the specified port.
 2. Electron app then displays a splash page, at the same time pings the `health` URL of the backend server.
 3. Once the `health` ping returns OK (the web app is up),Electron app switches the page to the home page of the web app.
 
