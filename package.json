@@ -29,17 +29,17 @@
     ]
   },
   "devDependencies": {
-    "copyfiles": "^1.2.0",
-    "electron": "^1.7.9",
-    "electron-builder": "^19.37.2",
-    "npm-run-all": "^4.1.1",
+    "copyfiles": "^2.0.0",
+    "electron": "^1.8.6",
+    "electron-builder": "^20.10.0",
+    "npm-run-all": "^4.1.2",
     "rimraf": "^2.6.2",
-    "run-script-os": "^1.0.2"
+    "run-script-os": "^1.0.3"
   },
   "dependencies": {
-    "axios": "^0.16.2",
+    "axios": "^0.18.0",
     "electron-is-dev": "^0.3.0",
-    "electron-log": "^2.2.9",
+    "electron-log": "^2.2.14",
     "get-port": "^3.2.0",
     "tree-kill": "^1.2.0"
   }
