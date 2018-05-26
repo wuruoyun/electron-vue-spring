@@ -48,7 +48,14 @@ function startServer(port) {
 
 function createWindow() {
   // Create the browser window
-  mainWindow = new BrowserWindow({ width: 800, height: 600 })
+  mainWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: false
+    }
+  })
 
   // and load the splash screen of the app
   mainWindow.loadURL(url.format({
@@ -62,7 +69,7 @@ function createWindow() {
   setTimeout(function cycle() {
     axios.get(`http://localhost:${serverPort}/health`)
       .then(response => {
-        mainWindow.loadURL(`http://localhost:${serverPort}`);
+        mainWindow.loadURL(`http://localhost:${serverPort}?_=${Date.now()}`);
       })
       .catch(e => {
         //console.log(e);

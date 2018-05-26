@@ -11,6 +11,7 @@ const router = new VueRouter({
 })
 
 Vue.prototype.$http = axios;
+Vue.prototype.$interop = window.interop;
 
 new Vue({
   el: '#app',
