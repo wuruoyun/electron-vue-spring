@@ -61,6 +61,12 @@ When launching the Electron app:
 2. Electron app then displays a splash page, at the same time pings the `health` URL of the backend server.
 3. Once the `health` ping returns OK (the web app is up),Electron app switches the page to the home page of the web app.
 
+### Security
+
+Although the Java backend is running locally, it may be more secure to load the page with Node integration disabled. This prevents third-party JavaScript libraries used by your web app from accessing Node directly, and mitigates the risk if your app navigates to external website.
+
+The access to Node can be selectively re-introduced back to the web app via `preload.js`, which defines a set of API on a global `window.interop` object. Upon launch, this object is assigned to `Vue.prototype.$interop`, making it available to all Vue components in your app. 
+
 ## License
 
 [MIT](LICENSE)
