@@ -34,8 +34,9 @@ npm run build
 
 During development, you may simple work on front-end and backend with independent tools. Note that the front-end `vue` project has its own `package.json` so it can be built independently.
 
-* For front-end, simple run `npm run dev` in `vue` folder. The webpack dev server will be running on port 9000 with hot reload. It is configured to proxy `health` and `api` URL to port 8080.
-* For backend, import the Maven project into your favorite Java IDE and launch from there. The embedded Tomcat server will be running on port 8080.
+* To run front-end, simple run `npm run dev` in `vue` folder. The webpack dev server will be running on port 9000 with hot reload. It is configured to proxy `health` and `api` URL to port 8080.
+* To run backend, import the Maven project into your favorite Java IDE and launch from there. The embedded Tomcat server will be running on port 8080.
+* To run the Electron part, run `npm run build-server` in root folder to build the jar file, then run `npm run start`.
 
 ## How it works
 
@@ -57,7 +58,7 @@ However, both `vue` sub project and `spring` sub project are free of Electron an
 
 When launching the Electron app:
 
-1. Electron app detects an available port and starts the backend server with Node `child_process` at the specified port.
+1. Electron app detects an available port and starts the backend server with Node `child_process` at the specified port. The PID of the server process is kept to kill the process before quiting the app.
 2. Electron app then displays a splash page, at the same time pings the `health` URL of the backend server.
 3. Once the `health` ping returns OK (the web app is up),Electron app switches the page to the home page of the web app.
 

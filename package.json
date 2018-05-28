@@ -12,7 +12,7 @@
     "build-spring:win32": "cd spring && mvnw package && cd ..",
     "build-spring:darwin": "cd spring && ./mvnw package && cd ..",
     "clean-spring": "rimraf spring/target",
-    "pack": "npm run build-vue && npm run build-spring && build --dir",
+    "build-server": "npm run build-vue && npm run build-spring",
     "build": "npm run build-vue && npm run build-spring && build",
     "clean": "rimraf dist && npm-run-all clean-vue clean-spring"
   },
