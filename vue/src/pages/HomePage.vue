@@ -12,6 +12,10 @@
     <button @click="decrease" :disabled="count <= 0">
       Decrease
     </button>
+    <h1>File dialog</h1>
+    <button @click="open">Show Open Dialog</button>
+    <button @click="save">Show Save Dialog</button>
+    <p><strong>Selected File(s)</strong>: {{selectedFile}}</p>
   </div>
 </template>
 
@@ -20,7 +24,8 @@ export default {
   data() {
     return {
       items: [],
-      count: 0
+      count: 0,
+      selectedFile: 'None'
     }
   },
   created() {
@@ -32,17 +37,22 @@ export default {
   methods: {
     increase() {
       this.count++;
-      if (this.$interop) {
-        this.$interop.setBadgeCount(this.count);
-      }
+      this.$interop.setBadgeCount(this.count);
     },
     decrease() {
       if (this.count > 0) {
         this.count--;
-        if (this.$interop) {
-          this.$interop.setBadgeCount(this.count);
-        }      
+        this.$interop.setBadgeCount(this.count);      
       }
+    },
+    open() {
+      this.$interop.showOpenDialog({
+        properties: ['openFile', 'openDirectory', 'multiSelections']
+      }, filePaths => this.selectedFile = filePaths);
+    },
+    save() {
+      this.$interop.showSaveDialog({},
+        filename => this.selectedFile = filename);
     }
   }
 }
