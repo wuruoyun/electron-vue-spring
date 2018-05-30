@@ -6,15 +6,10 @@
   "main": "electron/index.js",
   "scripts": {
     "start": "electron ./electron",
-    "build-vue": "cd vue && npm run build && copyfiles -u 1 dist/*.* ../spring/src/main/resources/public && cd ..",
-    "clean-vue": "cd vue && npm run clean && rimraf ../spring/src/main/resources/public && cd ..",
-    "build-spring": "run-script-os",
-    "build-spring:win32": "cd spring && mvnw package && cd ..",
-    "build-spring:darwin": "cd spring && ./mvnw package && cd ..",
-    "clean-spring": "rimraf spring/target",
-    "build-server": "npm run build-vue && npm run build-spring",
-    "build": "npm run build-vue && npm run build-spring && build",
-    "clean": "rimraf dist && npm-run-all clean-vue clean-spring"
+    "build-server": "node build/build-server.js",
+    "build-installer": "node build/build-installer.js",
+    "build": "npm-run-all clean build-server build-installer",
+    "clean": "rimraf dist"
   },
   "license": "MIT",
   "build": {
@@ -29,12 +24,11 @@
     ]
   },
   "devDependencies": {
-    "copyfiles": "^2.0.0",
-    "electron": "^1.8.6",
-    "electron-builder": "^20.10.0",
-    "npm-run-all": "^4.1.2",
+    "electron": "^2.0.2",
+    "electron-builder": "^20.15.1",
+    "npm-run-all": "^4.1.3",
     "rimraf": "^2.6.2",
-    "run-script-os": "^1.0.3"
+    "shelljs": "^0.8.2"
   },
   "dependencies": {
     "axios": "^0.18.0",
