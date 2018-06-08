@@ -3,28 +3,23 @@ const path = require('path');
 const url = require('url');
 const logger = require('electron-log');
 const getPort = require('get-port');
-
-// Module to control application life.
-const app = electron.app;
-// Module to create native browser window.
-const BrowserWindow = electron.BrowserWindow;
-
 const isDev = require('electron-is-dev');
+
+const { app, BrowserWindow, dialog } = electron;
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
 
 // The server process
-const jar = 'spring-1.0.0.jar'; // how to avoid manual update of this?
+const JAR = 'spring-1.0.0.jar'; // how to avoid manual update of this?
+const MAX_CHECK_COUNT = 10;
 let serverProcess;
-let serverPort;
 
 function startServer(port) {
   const platform = process.platform;
 
-  const server = isDev ? `spring/target/${jar}` 
-    : `${path.join(app.getAppPath(), '..', '..', jar)}`;
+  const server = `${path.join(app.getAppPath(), '..', '..', JAR)}`;
   logger.info(`Launching server with jar ${server} at port ${port}...`);
 
   serverProcess = require('child_process')
@@ -40,7 +35,6 @@ function startServer(port) {
 
   if (serverProcess.pid) {
     logger.info("Server PID: " + serverProcess.pid);
-    serverPort = port; // save the port
   } else {
     logger.error("Failed to launch server process.")
   }
@@ -64,19 +58,6 @@ function createWindow() {
     slashes: true
   }));
 
-  // check server health and switch to main page
-  const axios = require('axios');
-  setTimeout(function cycle() {
-    axios.get(`http://localhost:${serverPort}/health`)
-      .then(response => {
-        mainWindow.loadURL(`http://localhost:${serverPort}?_=${Date.now()}`);
-      })
-      .catch(e => {
-        //console.log(e);
-        setTimeout(cycle, 1000);
-      });
-  }, 200);
-
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
 
@@ -89,19 +70,47 @@ function createWindow() {
   });
 }
 
-function initialize() {
-  // Create window first to show splash before starting server
-  createWindow();
-  // Start server at an available port (prefer 8080)
-  getPort({ port: 8080 }).then(port => {
-    startServer(port);
-  })
+function loadHomePage(baseUrl) {
+  logger.info(`Loading home page at ${baseUrl}`);
+  // check server health and switch to main page
+  checkCount = 0;
+  const axios = require('axios');
+  setTimeout(function cycle() {
+    axios.get(`${baseUrl}/health`)
+      .then(response => {
+        mainWindow.loadURL(`${baseUrl}?_=${Date.now()}`);
+      })
+      .catch(e => {
+        if (checkCount < MAX_CHECK_COUNT) {
+          checkCount++;
+          setTimeout(cycle, 1000);
+        } else {
+          dialog.showErrorBox('Server timeout',
+            `UI does not receive server response for ${MAX_CHECK_COUNT} seconds.`);
+          app.quit()        
+        }
+      });
+  }, 200);
 }
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', initialize);
+app.on('ready', function () {
+  // Create window first to show splash before starting server
+  createWindow();
+
+  if (isDev) {
+    // Assume the webpack dev server is up at port 9000  
+    loadHomePage('http://localhost:9000');
+  } else {
+    // Start server at an available port (prefer 8080)
+    getPort({ port: 8080 }).then(port => {
+      startServer(port);
+      loadHomePage(`http://localhost:${port}`)
+    })
+  }
+});
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
