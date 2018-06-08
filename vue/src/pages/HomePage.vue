@@ -47,7 +47,7 @@ export default {
     },
     open() {
       this.$interop.showOpenDialog({
-        properties: ['openFile', 'openDirectory', 'multiSelections']
+        properties: ['openFile', 'multiSelections']
       }, filePaths => this.selectedFile = filePaths);
     },
     save() {
