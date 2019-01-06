@@ -4,14 +4,14 @@ function promptNoElectron() {
 
 // The following will be used if front end is run in browser during development.
 export default {
-  setBadgeCount(count) {
+  setBadgeCount(/*count*/) {
     promptNoElectron();
   },
-  showOpenDialog(options, callback) {
+  showOpenDialog(/*options, callback*/) {
     promptNoElectron();
     // You may choose to return something for testing instead
   },
-  showSaveDialog(options, callback) {
+  showSaveDialog(/*options, callback*/) {
     promptNoElectron();
     // You may choose to return something for testing instead
   }
