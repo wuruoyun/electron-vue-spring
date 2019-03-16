@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "A minimal starter project for using Electron, Vue and Spring.",
   "author": "Wu, Ruoyun",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wuruoyun/electron-vue-spring.git"
+  },
   "main": "electron/index.js",
   "scripts": {
     "start": "electron ./electron",
@@ -39,17 +43,17 @@
     ]
   },
   "devDependencies": {
-    "electron": "^3.0.8",
-    "electron-builder": "^20.15.1",
-    "npm-run-all": "^4.1.3",
-    "rimraf": "^2.6.2",
-    "shelljs": "^0.8.2"
+    "electron": "^4.1.0",
+    "electron-builder": "^20.39.0",
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^2.6.3",
+    "shelljs": "^0.8.3"
   },
   "dependencies": {
     "axios": "^0.18.0",
     "electron-is-dev": "^1.0.1",
-    "electron-log": "^2.2.14",
-    "get-port": "^4.0.0",
-    "tree-kill": "^1.2.0"
+    "electron-log": "^3.0.1",
+    "get-port": "^4.2.0",
+    "tree-kill": "^1.2.1"
   }
 }
