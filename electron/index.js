@@ -2,7 +2,7 @@ const electron = require('electron');
 const path = require('path');
 const url = require('url');
 const logger = require('electron-log');
-const getPort = require('get-port');
+var findPort = require("find-free-port");
 const isDev = require('electron-is-dev');
 
 const { app, BrowserWindow, dialog } = electron;
@@ -76,18 +76,23 @@ function loadHomePage(baseUrl) {
   checkCount = 0;
   const axios = require('axios');
   setTimeout(function cycle() {
-    axios.get(`${baseUrl}/health`)
+    axios.get(`${baseUrl}/actuator/health`)
       .then(response => {
         mainWindow.loadURL(`${baseUrl}?_=${Date.now()}`);
       })
       .catch(e => {
-        if (checkCount < MAX_CHECK_COUNT) {
-          checkCount++;
-          setTimeout(cycle, 1000);
+        if (e.code === 'ECONNREFUSED') {
+          if (checkCount < MAX_CHECK_COUNT) {
+            checkCount++;
+            setTimeout(cycle, 1000);
+          } else {
+            dialog.showErrorBox('Server timeout',
+              `UI does not receive server response for ${MAX_CHECK_COUNT} seconds.`);
+            app.quit()
+          }
         } else {
-          dialog.showErrorBox('Server timeout',
-            `UI does not receive server response for ${MAX_CHECK_COUNT} seconds.`);
-          app.quit()        
+          dialog.showErrorBox('Server error', 'UI receives an error from server.');
+          app.quit()
         }
       });
   }, 200);
@@ -105,10 +110,11 @@ app.on('ready', function () {
     loadHomePage('http://localhost:9000');
   } else {
     // Start server at an available port (prefer 8080)
-    getPort({ port: 8080 }).then(port => {
+    findPort(8080, function(err, port) {
+      logger.info(`Starting server at port ${port}`)
       startServer(port);
       loadHomePage(`http://localhost:${port}`)
-    })
+    });
   }
 });
 
