@@ -1,9 +1,9 @@
 const electron = require('electron');
 const path = require('path');
 const url = require('url');
-const logger = require('electron-log');
 var findPort = require("find-free-port");
 const isDev = require('electron-is-dev');
+const logger = require('./logger');
 
 const { app, BrowserWindow, dialog } = electron;
 
@@ -25,13 +25,7 @@ function startServer(port) {
   serverProcess = require('child_process')
     .spawn('java', [ '-jar', server, `--server.port=${port}`]);
 
-  serverProcess.stdout.on('data', data => {
-    logger.info('SERVER: ' + data);
-  });
-
-  serverProcess.stderr.on('data', data => {
-    logger.error('SERVER: ' + data);
-  });
+  serverProcess.stdout.on('data', logger.server);
 
   if (serverProcess.pid) {
     logger.info("Server PID: " + serverProcess.pid);
@@ -91,6 +85,7 @@ function loadHomePage(baseUrl) {
             app.quit()
           }
         } else {
+          logger.error(e)
           dialog.showErrorBox('Server error', 'UI receives an error from server.');
           app.quit()
         }
@@ -102,6 +97,9 @@ function loadHomePage(baseUrl) {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', function () {
+  logger.info('###################################################')
+  logger.info('#                Application Start                #')
+  logger.info('###################################################')
   // Create window first to show splash before starting server
   createWindow();
 

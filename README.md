@@ -70,6 +70,18 @@ Although the Java backend is running locally, it may be more secure to load the 
 
 The access to Node can be selectively re-introduced back to the web app via `preload.js`, which defines a set of API on a global `window.interop` object. Upon launch, this object is assigned to `Vue.prototype.$interop`, making it available to all Vue components in your app. 
 
+### Logging
+
+The log messages from Electron, Vue and Spring apps are consolidated into the [electron logger](https://www.npmjs.com/package/electron-log) in Electron app. By default it writes logs to the following locations:
+
+* on Linux: ~/.config/<app name>/log.log
+* on macOS: ~/Library/Logs/<app name>/log.log
+* on Windows: %USERPROFILE%\AppData\Roaming\<app name>\log.log
+
+In the Vue app, the electron logger is wrapped by the `log` property of `window.interop` object. During launch, this `log` is set as `Vue.prototype.$log` and `Vue.$log` in `main.js`. Calling `vm.$log.info(...)` or `Vue.$log.info(...)` will send the log messages (after attaching a prefix to identify it is from UI) to electron logger. Other logging level works in the same way.
+
+In the Spring app, `logback-spring.xml` configuration sends the log to console, which is the standard output received by the Electron app. The logback message pattern put the log level (`INFO`, `DEBUG`, etc.) at the begining of the message so that Electron app checks and calls the corresponding function (`info`, `debug`, etc.) on the electron logger.
+
 ## License
 
 [MIT](LICENSE)

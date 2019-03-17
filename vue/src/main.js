@@ -6,7 +6,13 @@ import interopFallback from './interop-fallback'
 Vue.config.productionTip = false
 
 Vue.prototype.$http = axios
-Vue.prototype.$interop = window.interop || interopFallback
+
+const interop = window.interop || interopFallback
+Vue.prototype.$interop = interop
+Vue.prototype.$log = interop.log
+Vue.$log = interop.log
+
+Vue.$log.info('==========> Vue app start')
 
 new Vue({
   render: h => h(App),

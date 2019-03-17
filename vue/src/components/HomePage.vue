@@ -32,6 +32,7 @@ export default {
     this.$http.get('/api/items')
       .then(response => {
         this.items = response.data;
+        this.$log.info('Received items from server.')
       });
   },
   methods: {
