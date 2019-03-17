@@ -7,7 +7,7 @@ module.exports = {
         ws: true,
         changeOrigin: true
       },
-      '^/health': {
+      '^/actuator/health': {
         target: 'http://localhost:8080'
       }
     }
