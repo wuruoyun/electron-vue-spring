@@ -15,8 +15,10 @@ let mainWindow;
 const JAR = 'spring-1.0.0.jar'; // how to avoid manual update of this?
 const MAX_CHECK_COUNT = 10;
 let serverProcess;
+let serverPort;
 
 function startServer(port) {
+  logger.info(`Starting server at port ${port}`)
   const platform = process.platform;
 
   const server = `${path.join(app.getAppPath(), '..', '..', JAR)}`;
@@ -28,6 +30,7 @@ function startServer(port) {
   serverProcess.stdout.on('data', logger.server);
 
   if (serverProcess.pid) {
+    serverPort = port
     logger.info("Server PID: " + serverProcess.pid);
   } else {
     logger.error("Failed to launch server process.")
@@ -40,17 +43,20 @@ function createWindow() {
     width: 800,
     height: 600,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: false
+      preload: path.join(__dirname, 'preload.js')
     }
-  })
+  });
 
-  // and load the splash screen of the app
-  mainWindow.loadURL(url.format({
-    pathname: path.join(__dirname, 'splash.html'),
-    protocol: 'file:',
-    slashes: true
-  }));
+  if (!serverPort) {
+    // server not up yet, load the splash screen
+    mainWindow.loadURL(url.format({
+      pathname: path.join(__dirname, 'splash.html'),
+      protocol: 'file:',
+      slashes: true
+    }));
+  } else {
+    loadHomePage();
+  }
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
@@ -64,7 +70,8 @@ function createWindow() {
   });
 }
 
-function loadHomePage(baseUrl) {
+function loadHomePage() {
+  const baseUrl = `http://localhost:${serverPort}`;
   logger.info(`Loading home page at ${baseUrl}`);
   // check server health and switch to main page
   checkCount = 0;
@@ -104,14 +111,14 @@ app.on('ready', function () {
   createWindow();
 
   if (isDev) {
-    // Assume the webpack dev server is up at port 9000  
-    loadHomePage('http://localhost:9000');
+    // Assume the webpack dev server is up at port 9000
+    serverPort = 9000;
+    loadHomePage();
   } else {
     // Start server at an available port (prefer 8080)
     findPort(8080, function(err, port) {
-      logger.info(`Starting server at port ${port}`)
       startServer(port);
-      loadHomePage(`http://localhost:${port}`)
+      loadHomePage();
     });
   }
 });

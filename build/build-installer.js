@@ -10,7 +10,7 @@ if (!shell.test('-e', 'spring/target')) {
 }
 
 shell.rm('-rf', 'dist')
-if (shell.exec('build').code !== 0) {
+if (shell.exec('electron-builder build').code !== 0) {
   shell.echo('Error: electron build failed')
   shell.exit(1)
 }

@@ -4,7 +4,7 @@
 
 In some cases, you may like to use Java backend for an Electron desktop app. The reasons could be you have some legacy Java codes that you want to reuse, or you want to have the same codes run on Cloud as well as on desktop.
 
-This project has two sub projects. Although they are just folders in this project, but they could be in their own Git repository and merged to this project using [Git subtree](https://help.github.com/articles/about-git-subtree-merges/).
+This project has two sub projects:
 
 1. `vue`: a Vue.js application as the front-end, based on the HelloWorld project created using Vue CLI 3.
 2. `spring`: a Spring Boot application as the backend, based on a Maven project created by [Spring Initializer](https://start.spring.io/) with Web dependency.
@@ -32,10 +32,10 @@ npm run build
 
 ## Development Setup
 
-During development, you may simple work on front-end and backend with independent tools. Note that the front-end `vue` project has its own `package.json` so it can be built independently.
+During development, you may work on front-end and backend separately with independent tools, such as using Visual Studio Code for front-end and IntelliJ for backend. Note that the front-end `vue` project has its own `package.json` so it can be built independently.
 
 * To run backend, import the Maven project into your favorite Java IDE and launch from there. The embedded Tomcat server will be running on port `8080`.
-* To run front-end, simple run `npm run serve` in `vue` folder. The webpack dev server will be running on port `9000` with hot reload. It is configured to proxy `actuator/health` and `api` URL to port `8080`.
+* To run front-end, run `npm run serve` in `vue` folder. The webpack dev server will be running on port `9000` with hot reload. It is configured to proxy `actuator/health` and `api` URL to port `8080`.
 * To run the Electron part, run `npm run start` in root folder. The Electron app loads the home page at `http://localhost:9000`, therefore you should run both backend and front-end first.
 
 ## How it works
