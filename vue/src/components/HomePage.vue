@@ -1,7 +1,8 @@
 <template>
   <div>
     <h1>Items from Server</h1>
-    <ul>
+    <p v-if="error">Failed to receive items. {{ error }}</p>
+    <ul v-else>
       <li v-for="item in items" :key="item.id">{{item.name}}</li>
     </ul>
     <h1>Set badge count</h1>
@@ -23,6 +24,7 @@
 export default {
   data() {
     return {
+      error: null,
       items: [],
       count: 0,
       selectedFile: 'None'
@@ -33,7 +35,10 @@ export default {
       .then(response => {
         this.items = response.data;
         this.$log.info('Received items from server.')
-      });
+      })
+      .catch(error => {
+        this.error = error 
+      })
   },
   methods: {
     increase() {

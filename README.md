@@ -58,11 +58,21 @@ However, both `vue` sub project and `spring` sub project are free of Electron an
 
 When launching the Electron app:
 
-1. Electron app detects an available port and starts the backend server with Node `child_process` at the specified port. The PID of the server process is kept to kill the process before quiting the app.
+1. Electron app detects an available port and starts the backend server with Node `child_process` at the specified port. The PID of the server process is kept to potentially kill the process before quiting the app.
 2. Electron app then displays a splash page, at the same time pings the `actuator/health` URL of the backend server.
 3. Once the `actuator/health` ping returns OK (the web app is up), Electron app switches the page to the home page of the web app.
 
 > The Electron app starts the backend server only in production build. During development, you will need to manually start the webpack-dev-server as mentioned earlier.
+
+### Shutdown process
+
+When shutting down the Electron app:
+
+1. Electron app handle `will-quit` event by trying to stop the backend server and cancel the quit.
+2. The first attempt is to shutdown gracefully via the `actuator/shutdown` URL of the backend server.
+3. If that fails, the Electron app will attempt to kill the process by its PID.
+4. Either of the shutsown attempts above will clear up the `baseUrl` and call `app.quit()` again.
+5. With `baseUrl` being cleared, `will-quit` handler will not prevent the quitting this time.
 
 ### Security
 

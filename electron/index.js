@@ -4,22 +4,22 @@ const url = require('url');
 var findPort = require("find-free-port");
 const isDev = require('electron-is-dev');
 const logger = require('./logger');
+const axios = require('axios');
 
 const { app, BrowserWindow, dialog } = electron;
+const JAR = 'spring-1.0.0.jar'; // how to avoid manual update of this?
+const MAX_CHECK_COUNT = 10;
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
 
-// The server process
-const JAR = 'spring-1.0.0.jar'; // how to avoid manual update of this?
-const MAX_CHECK_COUNT = 10;
+// The server url and process
 let serverProcess;
-let serverPort;
+let baseUrl;
 
 function startServer(port) {
   logger.info(`Starting server at port ${port}`)
-  const platform = process.platform;
 
   const server = `${path.join(app.getAppPath(), '..', '..', JAR)}`;
   logger.info(`Launching server with jar ${server} at port ${port}...`);
@@ -30,36 +30,68 @@ function startServer(port) {
   serverProcess.stdout.on('data', logger.server);
 
   if (serverProcess.pid) {
-    serverPort = port
+    baseUrl = `http://localhost:${port}`;
     logger.info("Server PID: " + serverProcess.pid);
   } else {
     logger.error("Failed to launch server process.")
   }
 }
 
-function createWindow() {
-  // Create the browser window
+function stopServer() {
+  logger.info('Stopping server...')
+  axios.post(`${baseUrl}/actuator/shutdown`, null, {
+    headers: {'Content-Type': 'application/json'}
+  })
+    .then(() => logger.info('Server stopped'))
+    .catch(error => {
+      logger.error('Failed to stop the server gracefully.', error)
+      if (serverProcess) {
+        logger.info(`Killing server process ${serverProcess.pid}`);
+        const kill = require('tree-kill');
+        kill(serverProcess.pid, 'SIGTERM', function (err) {
+          logger.info('Server process killed');
+          serverProcess = null;
+          baseUrl = null;
+          app.quit(); // quit again
+        });
+      }
+    })
+    .finally(() => {
+      serverProcess = null;
+      baseUrl = null;
+      app.quit(); // quit again
+    })
+}
+
+function createSplash() {
+  const splash = new BrowserWindow({ width: 400, height: 300, frame: false });
+  splash.loadURL(url.format({
+    pathname: path.join(__dirname, 'splash.html'),
+    protocol: 'file:',
+    slashes: true
+  }));
+  return splash
+}
+
+function createWindow(callback) {
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
+    show: false, // hide until ready-to-show
     webPreferences: {
       preload: path.join(__dirname, 'preload.js')
     }
   });
 
-  if (!serverPort) {
-    // server not up yet, load the splash screen
-    mainWindow.loadURL(url.format({
-      pathname: path.join(__dirname, 'splash.html'),
-      protocol: 'file:',
-      slashes: true
-    }));
-  } else {
-    loadHomePage();
-  }
+  loadHomePage();
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
+
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show()
+    if (callback) callback()
+  })
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
@@ -71,16 +103,12 @@ function createWindow() {
 }
 
 function loadHomePage() {
-  const baseUrl = `http://localhost:${serverPort}`;
   logger.info(`Loading home page at ${baseUrl}`);
   // check server health and switch to main page
   checkCount = 0;
-  const axios = require('axios');
   setTimeout(function cycle() {
     axios.get(`${baseUrl}/actuator/health`)
-      .then(response => {
-        mainWindow.loadURL(`${baseUrl}?_=${Date.now()}`);
-      })
+      .then(() => mainWindow.loadURL(`${baseUrl}?_=${Date.now()}`))
       .catch(e => {
         if (e.code === 'ECONNREFUSED') {
           if (checkCount < MAX_CHECK_COUNT) {
@@ -105,20 +133,21 @@ function loadHomePage() {
 // Some APIs can only be used after this event occurs.
 app.on('ready', function () {
   logger.info('###################################################')
-  logger.info('#                Application Start                #')
+  logger.info('#               Application Starting              #')
   logger.info('###################################################')
-  // Create window first to show splash before starting server
-  createWindow();
 
   if (isDev) {
     // Assume the webpack dev server is up at port 9000
-    serverPort = 9000;
-    loadHomePage();
+    baseUrl = `http://localhost:9000`;
+    createWindow();
   } else {
+    // Create window first to show splash before starting server
+    const splash = createSplash();
+
     // Start server at an available port (prefer 8080)
     findPort(8080, function(err, port) {
       startServer(port);
-      loadHomePage();
+      createWindow(() => splash.close());
     });
   }
 });
@@ -140,14 +169,10 @@ app.on('activate', function () {
   }
 });
 
-app.on('will-quit', () => {
-  if (serverProcess) {
-    logger.info(`Killing server process ${serverProcess.pid}`);
-    const kill = require('tree-kill');
-    kill(serverProcess.pid, 'SIGTERM', function (err) {
-      logger.info('Server process killed');
-        serverProcess = null;
-    });
+app.on('will-quit', e => {
+  if (!isDev && baseUrl != null) {
+    stopServer();
+    e.preventDefault(); // will quite later after stopped the server
   }
 });
 // In this file you can include the rest of your app's specific main process
