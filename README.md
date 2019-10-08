@@ -6,7 +6,7 @@ In some cases, you may like to use Java backend for an Electron desktop app. The
 
 This project has two sub projects:
 
-1. `vue`: a Vue.js application as the front-end, based on the HelloWorld project created using Vue CLI 3.
+1. `vue`: a Vue.js application as the front-end, based on the HelloWorld project created using Vue CLI 3. You may also replace this project with a React or Angular project with similar design.
 2. `spring`: a Spring Boot application as the backend, based on a Maven project created by [Spring Initializer](https://start.spring.io/) with Web dependency.
 
 Both Windows and Mac OS are supported.
@@ -59,8 +59,8 @@ However, both `vue` sub project and `spring` sub project are free of Electron an
 When launching the Electron app:
 
 1. Electron app detects an available port and starts the backend server with Node `child_process` at the specified port. The PID of the server process is kept to potentially kill the process before quiting the app.
-2. Electron app then displays a splash page, at the same time pings the `actuator/health` URL of the backend server.
-3. Once the `actuator/health` ping returns OK (the web app is up), Electron app switches the page to the home page of the web app.
+2. Electron app then displays a splash window, at the same time pings the `actuator/health` URL of the backend server.
+3. Once the `actuator/health` ping returns OK (the web app is up), Electron app closes the splash window and open a new window to load the home page of the web app.
 
 > The Electron app starts the backend server only in production build. During development, you will need to manually start the webpack-dev-server as mentioned earlier.
 
@@ -68,15 +68,15 @@ When launching the Electron app:
 
 When shutting down the Electron app:
 
-1. Electron app handle `will-quit` event by trying to stop the backend server and cancel the quit.
+1. Electron app handles the `will-quit` event by trying to stop the backend server and cancel the quit.
 2. The first attempt is to shutdown gracefully via the `actuator/shutdown` URL of the backend server.
 3. If that fails, the Electron app will attempt to kill the process by its PID.
 4. Either of the shutsown attempts above will clear up the `baseUrl` and call `app.quit()` again.
 5. With `baseUrl` being cleared, `will-quit` handler will not prevent the quitting this time.
 
-### Security
+### Node access
 
-Although the Java backend is running locally, it may be more secure to load the page with Node integration disabled. This prevents third-party JavaScript libraries used by your web app from accessing Node directly, and mitigates the risk if your app navigates to external website.
+Although the Java backend is running locally, it is more secure to load the page with Node integration disabled (defualt behavior). This prevents third-party JavaScript libraries used by your web app from accessing Node directly, and mitigates the risk if your app navigates to external website.
 
 The access to Node can be selectively re-introduced back to the web app via `preload.js`, which defines a set of API on a global `window.interop` object. Upon launch, this object is assigned to `Vue.prototype.$interop`, making it available to all Vue components in your app. 
 
