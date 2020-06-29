@@ -27,10 +27,10 @@ window.interop = {
   setBadgeCount(count) {
     return remote.app.setBadgeCount(count);
   },
-  showOpenDialog(options, callback) {
-    dialog.showOpenDialog(options, callback);
+  showOpenDialog(options) {
+    return dialog.showOpenDialog(options);
   },
   showSaveDialog(options, callback) {
-    dialog.showSaveDialog(options, callback);
+    return dialog.showSaveDialog(options);
   }
 };

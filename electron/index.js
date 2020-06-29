@@ -102,10 +102,16 @@ function createWindow(callback) {
   });
 }
 
+function quitOnError(title, content) {
+  logger.error(content)
+  dialog.showErrorBox(title, content)
+  app.quit()
+}
+
 function loadHomePage() {
-  logger.info(`Loading home page at ${baseUrl}`);
+  logger.info(`Loading home page at ${baseUrl}`)
   // check server health and switch to main page
-  checkCount = 0;
+  checkCount = 0
   setTimeout(function cycle() {
     axios.get(`${baseUrl}/actuator/health`)
       .then(() => mainWindow.loadURL(`${baseUrl}?_=${Date.now()}`))
@@ -115,14 +121,13 @@ function loadHomePage() {
             checkCount++;
             setTimeout(cycle, 1000);
           } else {
-            dialog.showErrorBox('Server timeout',
-              `UI does not receive server response for ${MAX_CHECK_COUNT} seconds.`);
+            quitOnError('Server timeout',
+              `UI does not receive server response for ${MAX_CHECK_COUNT} seconds.`)
             app.quit()
           }
         } else {
           logger.error(e)
-          dialog.showErrorBox('Server error', 'UI receives an error from server.');
-          app.quit()
+          quitOnError('Server error', 'UI receives an error from server.')
         }
       });
   }, 200);
@@ -146,8 +151,12 @@ app.on('ready', function () {
 
     // Start server at an available port (prefer 8080)
     findPort(8080, function(err, port) {
-      startServer(port);
-      createWindow(() => splash.close());
+      if (!err) {
+        startServer(port);
+        createWindow(() => splash.close());
+      } else {
+        quitOnError('Error', 'Unable to get a server port.')
+      }
     });
   }
 });

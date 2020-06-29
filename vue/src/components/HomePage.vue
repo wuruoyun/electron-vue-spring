@@ -5,7 +5,7 @@
     <ul v-else>
       <li v-for="item in items" :key="item.id">{{item.name}}</li>
     </ul>
-    <h1>Set badge count</h1>
+    <h1>Set badge count (Mac Only)</h1>
     <p>Click buttons below to set app badge count (calling Electron via preload script)</p>
     <button @click="increase">
       Increase
@@ -53,12 +53,13 @@ export default {
     },
     open() {
       this.$interop.showOpenDialog({
-        properties: ['openFile', 'multiSelections']
-      }, filePaths => this.selectedFile = filePaths);
+          properties: ['openFile', 'multiSelections']
+        })
+        .then(result => this.selectedFile = result.filePaths);
     },
     save() {
-      this.$interop.showSaveDialog({},
-        filename => this.selectedFile = filename);
+      this.$interop.showSaveDialog({})
+        .then(result => this.selectedFile = result.filePath);
     }
   }
 }
