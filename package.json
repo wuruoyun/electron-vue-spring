@@ -50,7 +50,7 @@
     "shelljs": "^0.8.4"
   },
   "dependencies": {
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "electron-is-dev": "^1.2.0",
     "electron-log": "^4.2.2",
     "find-free-port": "^2.0.0",
