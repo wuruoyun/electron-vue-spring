@@ -1,4 +1,4 @@
-const electron = require('electron');
+const { app, ipcMain, BrowserWindow, dialog } = require('electron');
 const path = require('path');
 const url = require('url');
 var findPort = require("find-free-port");
@@ -6,7 +6,6 @@ const isDev = require('electron-is-dev');
 const logger = require('./logger');
 const axios = require('axios');
 
-const { app, BrowserWindow, dialog } = electron;
 const JAR = 'spring-1.0.0.jar'; // how to avoid manual update of this?
 const MAX_CHECK_COUNT = 10;
 
@@ -136,10 +135,15 @@ function loadHomePage() {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', function () {
+app.whenReady().then(() => {
   logger.info('###################################################')
   logger.info('#               Application Starting              #')
   logger.info('###################################################')
+
+  // handle messages from ipcRenderer via preload.js
+  ipcMain.on('app:badgeCount', (_, count) => app.setBadgeCount(count));
+  ipcMain.handle('dialog:openFile', () => dialog.showOpenDialogSync());
+  ipcMain.handle('dialog:saveFile', () => dialog.showSaveDialogSync());
 
   if (isDev) {
     // Assume the webpack dev server is up at port 9000

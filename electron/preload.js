@@ -1,12 +1,9 @@
-const {remote} = require('electron');
-const {dialog} = remote;
+const { app, contextBridge, ipcRenderer } = require('electron');
 const logger = require('./logger');
 
 const LOG_PREFIX = '[ui]';
 
-window.versions = process.versions;
-
-window.interop = {
+contextBridge.exposeInMainWorld('interop', {
   log: {
     info (msg) {
       logger.info(`${LOG_PREFIX} ${msg}`);
@@ -25,12 +22,12 @@ window.interop = {
     }
   },
   setBadgeCount(count) {
-    return remote.app.setBadgeCount(count);
+    return ipcRenderer.send('app:badgeCount', count);
   },
-  showOpenDialog(options) {
-    return dialog.showOpenDialog(options);
+  showOpenDialog() {
+    return ipcRenderer.invoke('dialog:openFile');
   },
-  showSaveDialog(options, callback) {
-    return dialog.showSaveDialog(options);
+  showSaveDialog() {
+    return ipcRenderer.invoke('dialog:saveFile');
   }
-};
+});

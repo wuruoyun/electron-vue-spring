@@ -3,20 +3,19 @@
     <h1>Items from Server</h1>
     <p v-if="error">Failed to receive items. {{ error }}</p>
     <ul v-else>
-      <li v-for="item in items" :key="item.id">{{item.name}}</li>
+      <li v-for="item in items" :key="item.id">{{ item.name }}</li>
     </ul>
     <h1>Set badge count (Mac Only)</h1>
     <p>Click buttons below to set app badge count (calling Electron via preload script)</p>
-    <button @click="increase">
-      Increase
-    </button>
-    <button @click="decrease" :disabled="count <= 0">
-      Decrease
-    </button>
+    <button @click="increase">Increase</button>
+    <button @click="decrease" :disabled="count <= 0">Decrease</button>
     <h1>File dialog</h1>
     <button @click="open">Show Open Dialog</button>
     <button @click="save">Show Save Dialog</button>
-    <p><strong>Selected File(s)</strong>: {{selectedFile}}</p>
+    <p>
+      <strong>Selected File(s)</strong>
+      : {{ selectedFile }}
+    </p>
   </div>
 </template>
 
@@ -37,7 +36,7 @@ export default {
         this.$log.info('Received items from server.')
       })
       .catch(error => {
-        this.error = error 
+        this.error = error
       })
   },
   methods: {
@@ -48,18 +47,16 @@ export default {
     decrease() {
       if (this.count > 0) {
         this.count--;
-        this.$interop.setBadgeCount(this.count);      
+        this.$interop.setBadgeCount(this.count);
       }
     },
     open() {
-      this.$interop.showOpenDialog({
-          properties: ['openFile', 'multiSelections']
-        })
-        .then(result => this.selectedFile = result.filePaths);
+      this.$interop.showOpenDialog()
+        .then(result => this.selectedFile = result);
     },
     save() {
-      this.$interop.showSaveDialog({})
-        .then(result => this.selectedFile = result.filePath);
+      this.$interop.showSaveDialog()
+        .then(result => this.selectedFile = result);
     }
   }
 }
