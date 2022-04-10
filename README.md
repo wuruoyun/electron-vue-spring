@@ -84,9 +84,9 @@ The access to Node can be selectively re-introduced back to the web app via [pre
 
 The log messages from Electron, Vue and Spring apps are aggregated into the [electron logger](https://www.npmjs.com/package/electron-log) in Electron app. By default it writes logs to the following locations:
 
-- on Linux: ~/.config/<app name>/log.log
-- on macOS: ~/Library/Logs/<app name>/log.log
-- on Windows: %USERPROFILE%\AppData\Roaming\<app name>\log.log
+- on Linux: `~/.config/{app name}/logs/{process type}.log`
+- on macOS: `~/Library/Logs/{app name}/{process type}.log`
+- on Windows: `%USERPROFILE%\AppData\Roaming\{app name}\logs\{process type}.log`
 
 In the Vue app, the electron logger is wrapped by the `log` property of `window.interop` object. This `log` object is provided by Vue app instance in [main.ts](vue/src/main.ts) for injection into Vue components via key `KEY_LOG`. Calling `$log.info(...)` will send the log messages (after attaching a prefix to identify it is from UI) to electron logger. Other logging level works in the same way.
 
