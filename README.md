@@ -11,6 +11,12 @@ This project has two sub projects:
 
 Both Windows and Mac OS are supported.
 
+## Prerequisites
+
+- JDK 11, such as [Amazon Corretto 11](https://docs.aws.amazon.com/corretto/latest/corretto-11-ug/downloads-list.html)
+- Node 14.x
+- Maven 3.x
+
 > NOTE: This project uses your system Java to run the spring web app. If you prefer to bundle JRE into the app, configure the `extraFiles` of Electron Builder to copy it when making the installer.
 
 ## Build Installer
